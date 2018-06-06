@@ -1,0 +1,352 @@
+
+
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="format-detection" content="telephone=no">
+<link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600&amp;subset=cyrillic,latin'>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Tfj13fqQQqqzQFuaZ81WDzmmOU610WeS08VMuHmElK5oI2f7NwojuL6VupYXR/jK" crossorigin="anonymous">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+        html * {
+            font-size: 13px !important;
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+            -ms-word-break: break-all;
+            word-break: break-all;
+            word-break: break-word;
+            -ms-hyphens: auto;
+            -moz-hyphens: auto;
+            -webkit-hyphens: auto;
+            hyphens: auto;
+        }
+
+        input[type=text] {
+            border: none;
+            width: 310px;
+            border-bottom: solid 2px #c9c9c9;
+        }
+
+        .modal-body .form-horizontal .col-sm-2,
+        .modal-body .form-horizontal .col-sm-10 {
+            width: 100%
+        }
+
+        .modal-body .form-horizontal .control-label {
+            text-align: left;
+        }
+
+        .modal-body .form-horizontal .col-sm-offset-2 {
+            margin-left: 15px;
+        }
+
+        #overlay {
+            /*background: #ffffff;*/
+            background: rgba(255,255,255,.7);
+            color: #666666;
+            position: fixed;
+            height: 100%;
+            width: 100%;
+            z-index: 5000;
+            top: 0;
+            left: 0;
+            float: left;
+            text-align: center;
+            padding-top: 10%;
+            display: none;
+        }
+
+        .badge-red {
+            background: #e74c3c;
+        }
+
+        .badge-green {
+            background: rgb(0,128,0);
+        }
+       
+    </style>
+</head>
+<body>
+<div id="overlay">
+<img src="/images/ajax-loader2.gif" alt="Loading" style="margin-bottom:20px"><br />
+... loading, please wait ...
+</div>
+<div style="margin-left: 3px; margin-right: 3px">
+<div class="table-responsive" style="border:none">
+<table class="table">
+<thead>
+<tr style="border-color: #E1E1E1; border-width: 1px;"></tr>
+</thead>
+<tbody>
+<tr></tr>
+</tbody>
+</table>
+</div>
+</div>
+</body>
+<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" integrity="sha384-4Kp4aQ6UNeqsJ/ithPcxYnnIGt/QJJ64J9QtfDAJZUTaePAIPm9aaBdu7Gw84oGs" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+<script>
+
+    jQuery(window).load(function () {
+        jQuery('#overlayMain').fadeOut();      
+    });
+
+    
+
+    var header = $('.table thead tr');
+    var body = $('.table tbody tr:last');
+    var net = getUrlParameter('n');
+    var address;
+    var ABI = '';
+    var web3;
+    var contractAddress = getUrlParameter('a');
+    var myContract;
+    var myContractInstance;
+
+    
+
+
+    if ((contractAddress !== undefined) || (net !== undefined)) {
+
+        if (typeof web3 !== 'undefined') {
+            web3 = new Web3(web3.currentProvider);
+        } else {
+            web3 = new Web3(new Web3.providers.HttpProvider('https://' + net + '.infura.io'));
+        }
+
+        var hasInput = false;
+        var api = '';
+
+        if (net === 'mainnet')
+            api = 'api';
+        else
+            api = net;
+
+        $.getJSON('//' + api + '.etherscan.io/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
+            if (data.status == '0') {
+                header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
+
+            } else {
+
+
+
+                var result = ABI = JSON.parse(data.result);
+                var counter = 0;
+                var maxCounter = 0;
+
+                $.each(result, function (index, value) {
+                    if (value.constant === false) {
+                        var value_name = value.name.toString();
+
+                        if (value_name !== "") {
+                            counter += 1;
+
+                            var counterInput = 0;
+                            var maxItemsInput = value.inputs.length;
+                            var inputExtr = '';
+                            var inputExtr_WithName = '';
+
+                            if (value.inputs.length > 0) {
+                                $.each(value.inputs, function (i, v) {
+                                    counterInput += 1;
+                                    var inputTag = '';
+                                    var inputName = v.name.toString();
+
+
+                                    if (inputName !== "") {
+                                        inputTag = "<input type='text' id='input_" + counter + "' name=" + inputName + " placeholder=' &nbsp; " + inputName + " (" + v.type.toString() + ")'>";
+                                    } else {
+                                        inputTag = "<input type='text' id='input_" + counter + "' name='noname'  placeholder=' &nbsp; &lt;input&gt; (" + v.type.toString() + ")'>";
+                                    }
+
+                                    if (counterInput !== maxItemsInput) {
+                                        inputExtr += v.type.toString() + ",";
+                                        inputExtr_WithName += inputTag + ",";
+                                    } else {
+                                        inputExtr += v.type.toString();
+                                        inputExtr_WithName += inputTag;
+                                    }
+
+                                });
+                            }
+
+
+                            inputExtr_WithName += "&nbsp; <button type='button' class='write-btn' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
+
+
+                            GenerateRow(value_name, inputExtr, inputExtr_WithName, counter);
+                            hasInput = true;
+
+
+                        }
+                    }
+
+                });
+
+                if (hasInput) {
+
+                    var output = "<tr><td><br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. <a href='https://github.com/etherscan/writecontract'>Browse source code</a></p></td></tr>";
+                    body.before(output);
+
+                    header.append("<td><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right'>[<a href='/writecontract.html?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br></td>");
+                }
+                $('.write-btn').hide();
+            }
+
+            var obj = window.parent.document.getElementById('writecontractiframe');
+            if (obj !== null)
+                parent.resizeIframe(obj, 0);
+        });
+    }
+
+    function GenerateRow(fieldName, outputFields, outputFieldsWithName, counter) {
+
+        var output = "<tr><td style='background-color: #FCFCFC';>" + counter + ". <i class='fa fa-angle-right'></i> " + fieldName + " <i class='fa fa-long-arrow-right'></i> " + outputFieldsWithName + "</td></tr>";
+
+        body.before(output);
+
+    }
+
+    function write0(method, input) {
+       
+        
+        var functiontoCall = 'myContractInstance.' + method;
+        var params;
+        var ctrl = document.querySelectorAll("[id=" + input + "]");
+
+        for (var i = 0; i < ctrl.length; i++) {
+            if (i == 0) {
+                params = "'" + add0xforAddress(ctrl[i].value) + "'"
+            }
+            else {
+                params = params + ",'" + ctrl[i].value + "'"
+            }
+            if (ctrl[i].value == '') {
+                document.getElementById(input).focus();
+                alert('Input value cannot be empty');
+                return false;
+            }
+        }
+
+        new Function(functiontoCall + "(" + params + ", function(err, res){ showTx(res, '" + input + "'); });")();
+
+    }
+
+    function showTx(msg, input) {
+        var _url = '';
+        if (net !== 'mainnet')
+            _url = net + ".";
+
+
+        if (msg !== undefined)
+            $('.' + input).html("<a href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
+    }
+
+    function connectMetamask() {
+
+        var network = 0;
+        web3.version.getNetwork((err, netId) => {
+            network = netId;
+            switch (netId) {
+                case "1":
+                    network = 'mainnet'
+                    break
+                case "2":
+                    network = 'morden'
+                    break
+                case "3":
+                    network = 'ropsten';
+                    break
+                case "4":
+                    network = 'rinkeby';
+                    break
+                case "42":
+                    network = 'kovan';
+                    break
+                default:
+                    console.log('This is an unknown network.')
+            }
+
+            if (network.toLowerCase() !== net.toLowerCase()) {
+                alert("Please connect metamask to " + net + ' network');
+                return false;
+            } else {
+                web3.eth.getAccounts(function (err, accounts) {
+                    if (err) alert(err + '. Are you sure you are on a secure (SSL / HTTPS) connection?');
+
+                    if (accounts.length > 0) {
+                        address = accounts[0];
+                        var isAddress = web3.isAddress(address);
+
+
+                        if (isAddress) {
+
+                            var msg = 'Please take note that this is a beta version feature and is provided on an "as is" and "as available" basis. Etherscan does not give any warranties and will not be liable for any loss, direct or indirect through continued use of this feature.';
+
+                            if (confirm(msg)) {
+                                $('.write-btn').show();
+                                $('#connectMetamask').hide();
+                                web3.eth.defaultAccount = accounts[0];
+
+                                myContract = web3.eth.contract(ABI);
+                                myContractInstance = myContract.at(contractAddress);
+
+                                $('#connector').removeClass("badge-red").addClass("badge-green");
+                                $('#connector').attr('title', 'Connected');
+                            }
+
+
+                        }
+                    } else {
+                        alert('Metamask is not enabled');
+                    }
+
+                });
+            }
+        })
+
+        setTimeout(function () {
+            window.parent.writeContractLoaded = true;
+            var obj = window.parent.document.getElementById('writecontractiframe');
+            parent.resizeIframe(obj, 0);
+            window.parent.isFrameLoading = false;
+            window.parent.document.getElementById('overlayMain').style.display = 'none';
+        }, 50);  
+
+    }
+
+    function add0xforAddress(_address) {
+        _address = _address.trim();
+        if (_address.startsWith("0x") == false && _address.length == 40) {
+            _address = "0x" + _address;
+        }
+        return _address;
+    }
+
+    function getUrlParameter(sParam) {
+        var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+            sURLVariables = sPageURL.split('&'),
+            sParameterName,
+            i;
+
+        for (i = 0; i < sURLVariables.length; i++) {
+            sParameterName = sURLVariables[i].split('=');
+
+            if (sParameterName[0] === sParam) {
+                return sParameterName[1] === undefined ? true : sParameterName[1];
+            }
+        }
+    }
+
+     setTimeout(function () {
+            window.parent.writeContractLoaded = true;
+            var obj = window.parent.document.getElementById('writecontractiframe');
+            parent.resizeIframe(obj, 0);
+            window.parent.isFrameLoading = false;
+            window.parent.document.getElementById('overlayMain').style.display = 'none';
+        }, 50);  
+</script>
+</html>
