@@ -188,7 +188,7 @@
 
                 if (hasInput) {
 
-                    var output = "<tr><td><br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. <a href='https://github.com/etherscan/writecontract'>Browse source code</a></p></td></tr>";
+                    var output = "<tr><td><br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse<a href='https://github.com/etherscan/writecontract'>source code</a></p></td></tr>";
                     body.before(output);
 
                     header.append("<td><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right'>[<a href='/writecontract.html?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br></td>");
