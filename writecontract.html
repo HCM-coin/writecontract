@@ -112,10 +112,8 @@
 <script>
 
     jQuery(window).load(function () {
-        jQuery('#overlayMain').fadeOut();      
+        jQuery('#overlayMain').fadeOut();
     });
-
-    
 
     var header = $('.table thead tr');
     var body = $('.table tbody tr:last');
@@ -152,8 +150,6 @@
 
             } else {
 
-
-
                 var result = ABI = JSON.parse(data.result);
                 var counter = 0;
                 var maxCounter = 0;
@@ -161,21 +157,27 @@
                 $.each(result, function (index, value) {
                     if (value.constant === false) {
                         var value_name = value.name.toString();
+                        var isPayable = value.payable;
 
                         if (value_name !== "") {
                             counter += 1;
 
                             var counterInput = 0;
                             var maxItemsInput = value.inputs.length;
-                            var inputExtr = '';
                             var inputExtr_WithName = '';
 
+                            if (isPayable) {
+                                inputExtr_WithName += "<input type='text' id='input_payable_" + value_name + "' name='payable_" + value_name + "' placeholder=' &nbsp; payableAmount (ether)'>";
+                            }
+
                             if (value.inputs.length > 0) {
+
+                                inputExtr_WithName += isPayable ? "," : "";
+
                                 $.each(value.inputs, function (i, v) {
                                     counterInput += 1;
                                     var inputTag = '';
                                     var inputName = v.name.toString();
-
 
                                     if (inputName !== "") {
                                         inputTag = "<input type='text' id='input_" + counter + "' name=" + inputName + " placeholder=' &nbsp; " + inputName + " (" + v.type.toString() + ")'>";
@@ -184,10 +186,8 @@
                                     }
 
                                     if (counterInput !== maxItemsInput) {
-                                        inputExtr += v.type.toString() + ",";
                                         inputExtr_WithName += inputTag + ",";
                                     } else {
-                                        inputExtr += v.type.toString();
                                         inputExtr_WithName += inputTag;
                                     }
 
@@ -198,10 +198,8 @@
                             inputExtr_WithName += "&nbsp; <button type='button' class='write-btn' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
 
 
-                            GenerateRow(value_name, inputExtr, inputExtr_WithName, counter);
+                            GenerateRow(value_name, inputExtr_WithName, counter);
                             hasInput = true;
-
-
                         }
                     }
 
@@ -223,7 +221,7 @@
         });
     }
 
-    function GenerateRow(fieldName, outputFields, outputFieldsWithName, counter) {
+    function GenerateRow(fieldName, outputFieldsWithName, counter) {
 
         var output = "<tr><td style='background-color: #FCFCFC';>" + counter + ". <i class='fa fa-angle-right'></i> " + fieldName + " <i class='fa fa-long-arrow-right'></i> " + outputFieldsWithName + "</td></tr>";
 
@@ -232,8 +230,6 @@
     }
 
     function write0(method, input) {
-       
-        
         var functiontoCall = 'myContractInstance.' + method;
         var params;
         var ctrl = document.querySelectorAll("[id=" + input + "]");
@@ -252,8 +248,9 @@
             }
         }
 
-        new Function(functiontoCall + "(" + params + ", function(err, res){ showTx(res, '" + input + "'); });")();
-
+        var payableAmountInput = document.getElementById("input_payable_" + method);
+        var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + payableAmountInput.value + ', "ether") }' : ''; 
+        new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(res, '" + input + "'); });")();
     }
 
     function showTx(msg, input) {
