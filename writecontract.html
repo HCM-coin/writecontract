@@ -43,12 +43,7 @@
             hyphens: auto;
         }
 
-        input[type=text] {
-            border: none;
-            width: 310px;
-            border-bottom: solid 2px #c9c9c9;
-        }
-
+        
         .modal-body .form-horizontal .col-sm-2,
         .modal-body .form-horizontal .col-sm-10 {
             width: 100%
@@ -85,38 +80,56 @@
         .badge-green {
             background: rgb(0,128,0);
         }
+
+        .form-group label {
+            font-weight:normal !important;
+        }
        
     </style>
 </head>
 <body>
-<div id="overlay">
-<img src="/images/ajax-loader2.gif" alt="Loading" style="margin-bottom:20px"><br />
-... loading, please wait ...
-</div>
-<div style="margin-left: 3px; margin-right: 3px">
-<div class="table-responsive" style="border:none">
-<table class="table">
-<thead>
-<tr style="border-color: #E1E1E1; border-width: 1px;"></tr>
-</thead>
-<tbody>
-<tr></tr>
-</tbody>
-</table>
-</div>
-</div>
+    <div id="overlay">
+        <img src="/images/ajax-loader2.gif" alt="Loading" style="margin-bottom:20px"><br />
+        ... loading, please wait ...
+    </div>
+    <div style="margin-left: 3px; margin-right: 3px">
+        <div style="margin-left: 25px; margin-right: 25px">
+            <div class="panel-group acc-v1" id="accordion-1">
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="row header" style="position: fixed; width:100%; z-index: 10; background:#fff;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top:54px;">
+                            <div class="col-md-12">
+                                <div class="row">
+                                    <div class="panel-group acc-v1" id="accordion" role="tablist" aria-multiselectable="true">
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
-<script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" integrity="sha384-4Kp4aQ6UNeqsJ/ithPcxYnnIGt/QJJ64J9QtfDAJZUTaePAIPm9aaBdu7Gw84oGs" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
+
 <script>
 
     jQuery(window).load(function () {
         jQuery('#overlayMain').fadeOut();
     });
 
-    var header = $('.table thead tr');
-    var body = $('.table tbody tr:last');
+    var header = $('.row .header');
+    var body = $('#accordion');
     var net = getUrlParameter('n');
     var address;
     var ABI = '';
@@ -124,8 +137,6 @@
     var contractAddress = getUrlParameter('a');
     var myContract;
     var myContractInstance;
-
-    
 
 
     if ((contractAddress !== undefined) || (net !== undefined)) {
@@ -136,6 +147,7 @@
             web3 = new Web3(new Web3.providers.HttpProvider('https://' + net + '.infura.io'));
         }
 
+    
         var hasInput = false;
         var api = '';
 
@@ -167,35 +179,39 @@
                             var inputExtr_WithName = '';
 
                             if (isPayable) {
-                                inputExtr_WithName += "<input type='text' id='input_payable_" + value_name + "' name='payable_" + value_name + "' placeholder=' &nbsp; payableAmount (ether)'>";
+                                inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
+                                    '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name +'" placeholder="&nbsp; payableAmount (ether)"></div>';
                             }
 
-                            if (value.inputs.length > 0) {
-
-                                inputExtr_WithName += isPayable ? "," : "";
-
+                            if (value.inputs.length > 0) {                                                          
                                 $.each(value.inputs, function (i, v) {
                                     counterInput += 1;
                                     var inputTag = '';
                                     var inputName = v.name.toString();
 
-                                    if (inputName !== "") {
-                                        inputTag = "<input type='text' id='input_" + counter + "' name=" + inputName + " placeholder=' &nbsp; " + inputName + " (" + v.type.toString() + ")'>";
-                                    } else {
-                                        inputTag = "<input type='text' id='input_" + counter + "' name='noname'  placeholder=' &nbsp; &lt;input&gt; (" + v.type.toString() + ")'>";
-                                    }
+                                    if (v.type.indexOf('][') !== -1) {
+                                        var regex = /\[([0-9,-]+)\]/;
+                                        var dynamicArray = v.type.toString().match(regex)[1];
+                                        var d;
+                                        inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
+                                        for (d = 0; d < dynamicArray; d++) {
 
-                                    if (counterInput !== maxItemsInput) {
-                                        inputExtr_WithName += inputTag + ",";
-                                    } else {
-                                        inputExtr_WithName += inputTag;
-                                    }
+                                            inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter  + '" name="noname" data-grp="g' + counterInput +'" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+                                        }
 
+                                        inputTag += '</div>';
+
+
+                                    } else {
+                                        inputTag = GenerateInputTag(inputName, counter, v.type.toString());
+                                    }                                   
+
+                                    inputExtr_WithName += inputTag;                                
                                 });
                             }
 
 
-                            inputExtr_WithName += "&nbsp; <button type='button' class='write-btn' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
+                            inputExtr_WithName += "<button type='button' class='write-btn btn' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
 
 
                             GenerateRow(value_name, inputExtr_WithName, counter);
@@ -207,10 +223,10 @@
 
                 if (hasInput) {
 
-                    var output = "<tr><td><br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p></td></tr>";
+                    var output = "<br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>";
                     body.before(output);
 
-                    header.append("<td><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right'>[<a href='/writecontract/writecontract.html?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br></td>");
+                    header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='/writecontract.html?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
                 }
                 $('.write-btn').hide();
             }
@@ -221,37 +237,128 @@
         });
     }
 
-    function GenerateRow(fieldName, outputFieldsWithName, counter) {
+    function GenerateInputTag(inputName, counter, type) {
+        if (inputName !== "") {
+            return ' <div class="form-group"><label>' + inputName + ' (' + type + ') </label>' +
+                '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder="&nbsp; ' + inputName + ' (' + type + ')"></div>';
 
-        var output = "<tr><td style='background-color: #FCFCFC';>" + counter + ". <i class='fa fa-angle-right'></i> " + fieldName + " <i class='fa fa-long-arrow-right'></i> " + outputFieldsWithName + "</td></tr>";
+        } else {
+           return ' <div class="form-group"><label>' + type + '</label>' +
+                '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type+ '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
+        }
+    }
+
+    function GenerateRow(fieldName, outputFieldsWithName, counter) {
+        var output = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading' + counter + '"><h4 class="panel-title">' +
+            counter + '. <a role="button"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + fieldName + '</a></h4></div>' +
+            '<div id="collapse' + counter +'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
 
         body.before(output);
-
     }
 
     function write0(method, input) {
         var functiontoCall = 'myContractInstance.' + method;
-        var params;
+        var params =[];
         var ctrl = document.querySelectorAll("[id=" + input + "]");
 
+       
+        var inputs = [];
         for (var i = 0; i < ctrl.length; i++) {
-            if (i == 0) {
-                params = "'" + add0xforAddress(ctrl[i].value) + "'"
-            }
-            else {
-                params = params + ",'" + ctrl[i].value + "'"
-            }
-            if (ctrl[i].value == '') {
+            var type = ctrl[i].getAttribute('data-type');
+            var grp = ctrl[i].getAttribute('data-grp');
+            var values = [];
+
+            if (ctrl[i].value == '' && grp === null) {
                 document.getElementById(input).focus();
                 alert('Input value cannot be empty');
                 return false;
             }
+      
+            var value = ctrl[i].value;
+            if (value) {
+                if (type.indexOf('[') !== -1 && type.indexOf(']') !== -1) values.push(value.split(','));
+                else values.push(value);
+            } else values.push('');     
+            
+            inputs.push({ type: type, value: values, grp: grp });            
         }
 
+        var params = encodeParams(inputs);      
         var payableAmountInput = document.getElementById("input_payable_" + method);
         var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + payableAmountInput.value + ', "ether") }' : ''; 
+        
         new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(res, '" + input + "'); });")();
     }
+
+    function encodeParams(values) {
+        console.log(values);
+        var params = '';
+
+        for (i = 0; i < values.length; i++) {
+            var param = values[i];
+
+            if (param.value !== '') {
+                if (param.grp !== null) {
+                    var _grp = values.filter(x => x.grp == param.grp);
+                    var _grpParam = '';
+
+                    for (g = 0; g < _grp.length; g++) {
+                        param = _grp[g];
+
+                        if (param.value[0] !== '') {
+                            if (g == 0)
+                                _grpParam = '[' + toHex(param.type, param.value[0]);
+                            else
+                                _grpParam = _grpParam + ',' + toHex(param.type, param.value[0]);
+                        }
+                    }
+                    _grpParam += ']';
+
+                    if (i == 0)
+                        params += _grpParam;
+                    else
+                        params += ',' + _grpParam;
+
+                    i += _grp.length - 1;
+                }
+                else {
+                    if (i == 0)
+                        params = toHex(param.type, param.value[0]);
+                    else
+                        params = params + ',' + toHex(param.type, param.value[0]);
+                }
+            }           
+        }
+
+        return params;
+    }
+
+    function toHex(type, val) {
+
+        if (Array.isArray(val)) {
+            var param = "[";
+
+            var i;
+            for (i = 0; i < val.length; i++) {
+                if (i == 0)
+                    param += toHex(type, val[i]);
+                else
+                    param = param + ',' + toHex(type, val[i]);
+            }
+            param += "]";
+
+            return param;
+
+        } else {
+            if (type.indexOf('bool') !== -1)
+                return JSON.parse(val);          
+            else if (type.indexOf('address') !== -1)
+                return "'" + add0xforAddress(val) + "'"
+            else
+                return "'" + val + "'"
+        }
+       
+    };
 
     function showTx(msg, input) {
         var _url = '';
@@ -260,7 +367,7 @@
 
 
         if (msg !== undefined)
-            $('.' + input).html("<a href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
+            $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
     }
 
     function connectMetamask() {
@@ -329,9 +436,13 @@
         setTimeout(function () {
             window.parent.writeContractLoaded = true;
             var obj = window.parent.document.getElementById('writecontractiframe');
-            parent.resizeIframe(obj, 0);
-            window.parent.isFrameLoading = false;
-            window.parent.document.getElementById('overlayMain').style.display = 'none';
+
+            if (obj !== null) {
+                parent.resizeIframe(obj, 0);
+                window.parent.isFrameLoading = false;
+                window.parent.document.getElementById('overlayMain').style.display = 'none';
+            }
+          
         }, 50);  
 
     }
@@ -359,12 +470,17 @@
         }
     }
 
+    
      setTimeout(function () {
             window.parent.writeContractLoaded = true;
-            var obj = window.parent.document.getElementById('writecontractiframe');
-            parent.resizeIframe(obj, 0);
-            window.parent.isFrameLoading = false;
-            window.parent.document.getElementById('overlayMain').style.display = 'none';
+         var obj = window.parent.document.getElementById('writecontractiframe');
+
+         if (obj !== null) {
+             parent.resizeIframe(obj, 0);
+             window.parent.isFrameLoading = false;
+             window.parent.document.getElementById('overlayMain').style.display = 'none';
+         }
+           
         }, 50);  
 </script>
 </html>
