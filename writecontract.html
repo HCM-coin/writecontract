@@ -285,13 +285,13 @@
 
         var params = encodeParams(inputs);      
         var payableAmountInput = document.getElementById("input_payable_" + method);
-        var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + payableAmountInput.value + ', "ether") }' : ''; 
+        var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + escape(payableAmountInput.value) + ', "ether") }' : ''; 
         
         new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(res, '" + input + "'); });")();
     }
 
-    function encodeParams(values) {        
-        var params = undefined;
+    function encodeParams(values) {       
+        var params = '';
 
         if (values.length === 0)
             return undefined;
@@ -309,9 +309,9 @@
 
                         if (param.value[0] !== '') {
                             if (g == 0)
-                                _grpParam = '[' + toHex(param.type, param.value[0]);
+                                _grpParam = '[' + toHex(param.type, escape(param.value[0]));
                             else
-                                _grpParam = _grpParam + ',' + toHex(param.type, param.value[0]);
+                                _grpParam = _grpParam + ',' + toHex(param.type, escape(param.value[0]));
                         }
                     }
                     _grpParam += ']';
@@ -325,9 +325,9 @@
                 }
                 else {
                     if (i == 0)
-                        params = toHex(param.type, param.value[0]);
+                        params = toHex(param.type, escape(param.value[0]));
                     else
-                        params = params + ',' + toHex(param.type, param.value[0]);
+                        params = params + ',' + toHex(param.type, escape(param.value[0]));
                 }
             }           
         }
