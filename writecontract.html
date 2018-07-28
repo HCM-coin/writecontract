@@ -290,9 +290,11 @@
         new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(res, '" + input + "'); });")();
     }
 
-    function encodeParams(values) {
-        console.log(values);
-        var params = '';
+    function encodeParams(values) {        
+        var params = undefined;
+
+        if (values.length === 0)
+            return undefined;
 
         for (i = 0; i < values.length; i++) {
             var param = values[i];
