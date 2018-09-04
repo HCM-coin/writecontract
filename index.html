@@ -336,7 +336,12 @@
     }
 
     function Escape(val) {
-        return val.replace(/'/g, "\\u0027");
+
+        if (typeof myVar === 'string' || myVar instanceof String)
+            return val.replace(/'/g, "\\u0027");
+        else
+            return val;
+        
     }
 
     function toHex(type, val) {
