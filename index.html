@@ -337,7 +337,7 @@
 
     function Escape(val) {
 
-        if (typeof myVar === 'string' || myVar instanceof String)
+        if (typeof val === 'string' || val instanceof String)
             return val.replace(/'/g, "\\u0027");
         else
             return val;
