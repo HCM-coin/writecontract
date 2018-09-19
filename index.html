@@ -260,9 +260,8 @@
         var functiontoCall = 'myContractInstance.' + method;
         var params =[];
         var ctrl = document.querySelectorAll("[id=" + input + "]");
-
-       
         var inputs = [];
+
         for (var i = 0; i < ctrl.length; i++) {
             var type = ctrl[i].getAttribute('data-type');
             var grp = ctrl[i].getAttribute('data-grp');
@@ -274,7 +273,7 @@
                 return false;
             }
       
-            var value = ctrl[i].value;
+            var value = strip(ctrl[i].value);
             if (value) {
                 if (type.indexOf('[') !== -1 && type.indexOf(']') !== -1) values.push(value.split(','));
                 else values.push(value);
@@ -287,7 +286,12 @@
         var payableAmountInput = document.getElementById("input_payable_" + method);
         var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + Escape(payableAmountInput.value) + ', "ether") }' : ''; 
         
-        new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(res, '" + input + "'); });")();
+        try {
+            new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(err, res, '" + input + "'); });")();
+        } catch (err){
+            showTx(err.message,'',input);
+        }
+       
     }
 
     function encodeParams(values) {       
@@ -344,6 +348,17 @@
         
     }
 
+    function strip(val) {
+
+        
+        val = val.replace(/"/g, '');
+        val = val.replace('[','');
+        val = val.replace(']','');
+    
+
+        return val;
+    }
+
     function toHex(type, val) {
 
         if (Array.isArray(val)) {
@@ -371,15 +386,21 @@
        
     };
 
-    function showTx(msg, input) {
-        var _url = '';
-        if (net !== 'mainnet')
-            _url = net + ".";
+    function showTx(err, msg, input) {
+
+            if (err) {
+                $('.' + input).html("<font color='red'>" + err + "</font>");
+            } else {
+                var _url = '';
+                if (net !== 'mainnet')
+                    _url = net + ".";
 
 
-        if (msg !== undefined)
-            $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
-    }
+                if (msg !== undefined)
+                    $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
+            }
+
+        }
 
     function connectMetamask() {
 
