@@ -141,7 +141,9 @@
 
     if ((contractAddress !== undefined) || (net !== undefined)) {
 
-        if (typeof web3 !== 'undefined') {
+        if (typeof ethereum !== 'undefined') {
+            web3 = new Web3(ethereum);
+        } else if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
         } else {
             web3 = new Web3(new Web3.providers.HttpProvider('https://' + net + '.infura.io'));
@@ -431,37 +433,13 @@
                 alert("Please connect metamask to " + net + ' network');
                 return false;
             } else {
-                web3.eth.getAccounts(function (err, accounts) {
-                    if (err) alert(err + '. Are you sure you are on a secure (SSL / HTTPS) connection?');
-
-                    if (accounts.length > 0) {
-                        address = accounts[0];
-                        var isAddress = web3.isAddress(address);
-
-
-                        if (isAddress) {
-
-                            var msg = 'Please take note that this is a beta version feature and is provided on an "as is" and "as available" basis. Etherscan does not give any warranties and will not be liable for any loss, direct or indirect through continued use of this feature.';
-
-                            if (confirm(msg)) {
-                                $('.write-btn').show();
-                                $('#connectMetamask').hide();
-                                web3.eth.defaultAccount = accounts[0];
-
-                                myContract = web3.eth.contract(ABI);
-                                myContractInstance = myContract.at(contractAddress);
-
-                                $('#connector').removeClass("badge-red").addClass("badge-green");
-                                $('#connector').attr('title', 'Connected');
-                            }
-
-
-                        }
-                    } else {
-                        alert('Metamask is not enabled');
-                    }
-
-                });
+                if (typeof ethereum !== 'undefined') {
+                    ethereum.enable().then(function () {
+                        getMetamaskAccounts()
+                    });
+                } else {
+                    getMetamaskAccounts()
+                }
             }
         })
 
@@ -477,6 +455,36 @@
           
         }, 50);  
 
+    }
+
+    function getMetamaskAccounts() {
+        web3.eth.getAccounts(function (err, accounts) {
+            if (err) alert(err + '. Are you sure you are on a secure (SSL / HTTPS) connection?');
+
+            if (accounts.length > 0) {
+                address = accounts[0];
+                var isAddress = web3.isAddress(address);
+              
+                if (isAddress) {
+
+                    var msg = 'Please take note that this is a beta version feature and is provided on an "as is" and "as available" basis. Etherscan does not give any warranties and will not be liable for any loss, direct or indirect through continued use of this feature.';
+
+                    if (confirm(msg)) {
+                        $('.write-btn').show();
+                        $('#connectMetamask').hide();
+                        web3.eth.defaultAccount = accounts[0];
+
+                        myContract = web3.eth.contract(ABI);
+                        myContractInstance = myContract.at(contractAddress);
+
+                        $('#connector').removeClass("badge-red").addClass("badge-green");
+                        $('#connector').attr('title', 'Connected');
+                    }
+                }
+            } else {
+                alert('Metamask is not enabled');
+            }
+        });
     }
 
     function add0xforAddress(_address) {
