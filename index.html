@@ -138,6 +138,7 @@
     var myContract;
     var myContractInstance;
     var hasInput = false;
+    var api = '';
 
 
     if ((contractAddress !== undefined) || (net !== undefined)) {
@@ -151,7 +152,6 @@
         }
 
     
-        var api = '';
 
         if (net === 'mainnet')
             api = 'api';
@@ -278,7 +278,7 @@
     }
 
     function NewProxySection(body, address) {
-        let section = '<div class="row"><p>Showing ABI for possible implementation ' + address + '</p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
+        let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '">' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
         body.after(section);
         return $('#impl'+address);
     }
