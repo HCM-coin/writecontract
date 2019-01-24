@@ -169,57 +169,59 @@
                 var maxCounter = 0;
 
                 $.each(result, function (index, value) {
-                    if (value.constant === false) {
-                        var value_name = value.name.toString();
-                        var isPayable = value.payable;
-
-                        if (value_name !== "") {
-                            counter += 1;
-
-                            var counterInput = 0;
-                            var maxItemsInput = value.inputs.length;
-                            var inputExtr_WithName = '';
-
-                            if (isPayable) {
-                                inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
-                                    '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name +'" placeholder="&nbsp; payableAmount (ether)"></div>';
-                            }
-
-                            if (value.inputs.length > 0) {                                                          
-                                $.each(value.inputs, function (i, v) {
-                                    counterInput += 1;
-                                    var inputTag = '';
-                                    var inputName = v.name.toString();
-
-                                    if (v.type.indexOf('][') !== -1) {
-                                        var regex = /\[([0-9,-]+)\]/;
-                                        var dynamicArray = v.type.toString().match(regex)[1];
-                                        var d;
-                                        inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
-                                        for (d = 0; d < dynamicArray; d++) {
-
-                                            inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter  + '" name="noname" data-grp="g' + counterInput +'" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
-                                        }
-
-                                        inputTag += '</div>';
-
-
-                                    } else {
-                                        inputTag = GenerateInputTag(inputName, counter, v.type.toString());
-                                    }                                   
-
-                                    inputExtr_WithName += inputTag;                                
-                                });
-                            }
-
-
-                            inputExtr_WithName += "<button type='button' class='write-btn btn btn-default' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
-
-
-                            GenerateRow(value_name, inputExtr_WithName, counter);
-                            hasInput = true;
-                        }
+                    if (value.constant !== false) {
+                        return;
                     }
+                    var value_name = value.name.toString();
+
+                    if (value_name !== "") {
+                        return;
+                    }
+                    counter += 1;
+
+                    var isPayable = value.payable;
+                    var counterInput = 0;
+                    var maxItemsInput = value.inputs.length;
+                    var inputExtr_WithName = '';
+
+                    if (isPayable) {
+                        inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
+                            '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name +'" placeholder="&nbsp; payableAmount (ether)"></div>';
+                    }
+
+                    if (value.inputs.length > 0) {
+                        $.each(value.inputs, function (i, v) {
+                            counterInput += 1;
+                            var inputTag = '';
+                            var inputName = v.name.toString();
+
+                            if (v.type.indexOf('][') !== -1) {
+                                var regex = /\[([0-9,-]+)\]/;
+                                var dynamicArray = v.type.toString().match(regex)[1];
+                                var d;
+                                inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
+                                for (d = 0; d < dynamicArray; d++) {
+
+                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter  + '" name="noname" data-grp="g' + counterInput +'" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+                                }
+
+                                inputTag += '</div>';
+
+
+                            } else {
+                                inputTag = GenerateInputTag(inputName, counter, v.type.toString());
+                            }                                   
+
+                            inputExtr_WithName += inputTag;                                
+                        });
+                    }
+
+
+                    inputExtr_WithName += "<button type='button' class='write-btn btn btn-default' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
+
+
+                    GenerateRow(value_name, inputExtr_WithName, counter);
+                    hasInput = true;
 
                 });
 
@@ -511,16 +513,16 @@
     }
 
     
-     setTimeout(function () {
-            window.parent.writeContractLoaded = true;
-         var obj = window.parent.document.getElementById('writecontractiframe');
+    setTimeout(function () {
+        window.parent.writeContractLoaded = true;
+        var obj = window.parent.document.getElementById('writecontractiframe');
 
-         if (obj !== null) {
-             parent.resizeIframe(obj, 0);
-             window.parent.isFrameLoading = false;
-             window.parent.document.getElementById('overlayMain').style.display = 'none';
-         }
+        if (obj !== null) {
+            parent.resizeIframe(obj, 0);
+            window.parent.isFrameLoading = false;
+            window.parent.document.getElementById('overlayMain').style.display = 'none';
+        }
            
-        }, 50);  
+    }, 50);  
 </script>
 </html>
