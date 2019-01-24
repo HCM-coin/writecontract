@@ -137,6 +137,7 @@
     var contractAddress = getUrlParameter('a');
     var myContract;
     var myContractInstance;
+    var hasInput = false;
 
 
     if ((contractAddress !== undefined) || (net !== undefined)) {
@@ -170,7 +171,6 @@
                 var counter = 0;
                 var maxCounter = 0;
 
-                var hasInput = false;
                 $.each(result, function (index, value) {
                     if (value.constant !== false) {
                         if (maxDepth > 0 && value.name.toString() === "implementation" && value.inputs.length === 0) {
@@ -237,18 +237,9 @@
 
 
                     GenerateRow(value_name, inputExtr_WithName, counter, body);
-                    hasInput = true;
 
                 });
 
-                if (hasInput) {
-
-                    var output = "<br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>";
-                    body.before(output);
-
-                    header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
-                }
-                $('.write-btn').hide();
             }
 
             var obj = window.parent.document.getElementById('writecontractiframe');
@@ -269,6 +260,15 @@
     }
 
     function GenerateRow(fieldName, outputFieldsWithName, counter, body) {
+        if (!hasInput) {
+            hasInput = true;
+
+            var output = "<br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>";
+            body.before(output);
+
+            header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
+        }
+        $('.write-btn').hide();
         var output = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading' + counter + '"><h4 class="panel-title">' +
             counter + '. <a role="button"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + fieldName + '</a></h4></div>' +
             '<div id="collapse' + counter +'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
