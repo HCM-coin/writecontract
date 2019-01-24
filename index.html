@@ -150,14 +150,16 @@
         }
 
     
-        var hasInput = false;
         var api = '';
 
         if (net === 'mainnet')
             api = 'api';
         else
             api = net;
+        appendABI(contractAddress, body, 5);
+    }
 
+    function appendABI(contractAddress, body, maxDepth) {
         $.getJSON('//' + api + '.etherscan.io/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
             if (data.status == '0') {
                 header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
@@ -168,8 +170,22 @@
                 var counter = 0;
                 var maxCounter = 0;
 
+                var hasInput = false;
                 $.each(result, function (index, value) {
                     if (value.constant !== false) {
+                        if (maxDepth > 0 && value.name.toString() === "implementation" && value.inputs.length === 0) {
+                            web3.eth.call({
+                                to: contractAddress,
+                                data: "0x5c60da1b"
+                            }, (error, implementationAddress) => {
+                                if (error) {
+                                    console.error(error);
+                                    return;
+                                }
+                                let implementationSection = NewSection(body, "imp-"+implementationAddress.slice(2));
+                                appendABI(implementationAddress, implementationSection, maxDepth - 1);
+                            });
+                        }
                         return;
                     }
                     var value_name = value.name.toString();
@@ -220,7 +236,7 @@
                     inputExtr_WithName += "<button type='button' class='write-btn btn btn-default' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
 
 
-                    GenerateRow(value_name, inputExtr_WithName, counter);
+                    GenerateRow(value_name, inputExtr_WithName, counter, body);
                     hasInput = true;
 
                 });
@@ -252,12 +268,18 @@
         }
     }
 
-    function GenerateRow(fieldName, outputFieldsWithName, counter) {
+    function GenerateRow(fieldName, outputFieldsWithName, counter, body) {
         var output = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading' + counter + '"><h4 class="panel-title">' +
             counter + '. <a role="button"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + fieldName + '</a></h4></div>' +
             '<div id="collapse' + counter +'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
 
         body.before(output);
+    }
+
+    function NewSection(body, id) {
+        let section = '<div class='row'><div class="panel-group acc-v1" id="' + id + '" role="tablist" aria-multiselectable="true"></div></div>';
+        body.after(section);
+        return $('#'+id);
     }
 
     function write0(method, input) {
