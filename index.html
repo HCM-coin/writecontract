@@ -182,7 +182,7 @@
                                     console.error(error);
                                     return;
                                 }
-                                implementationAddress = "0x" + implementationAddress.slice(26);
+                                implementationAddress = web3.toChecksumAddress("0x" + implementationAddress.slice(26));
                                 let implementationSection = NewProxySection(body, implementationAddress);
                                 appendABI(implementationAddress, implementationSection, maxDepth - 1);
                             });
