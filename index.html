@@ -279,7 +279,7 @@
 
     function NewProxySection(body, address) {
         let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '">' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
-        body.after(section);
+        body.parent().after(section);
         return $('#impl'+address);
     }
 
