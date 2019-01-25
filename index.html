@@ -1,18 +1,18 @@
 <!--
   The MIT License
- 
+
   Copyright (c) 2018, Etherscan.
- 
+
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
   in the Software without restriction, including without limitation the rights
   to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
   copies of the Software, and to permit persons to whom the Software is
   furnished to do so, subject to the following conditions:
- 
+
   The above copyright notice and this permission notice shall be included in
   all copies or substantial portions of the Software.
- 
+
   THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
   FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +23,13 @@
 -->
 <html>
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="format-detection" content="telephone=no">
-<link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600&amp;subset=cyrillic,latin'>
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Tfj13fqQQqqzQFuaZ81WDzmmOU610WeS08VMuHmElK5oI2f7NwojuL6VupYXR/jK" crossorigin="anonymous">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600&amp;subset=cyrillic,latin'>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Tfj13fqQQqqzQFuaZ81WDzmmOU610WeS08VMuHmElK5oI2f7NwojuL6VupYXR/jK" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
         html * {
             font-size: 13px !important;
             overflow-wrap: break-word;
@@ -43,7 +43,7 @@
             hyphens: auto;
         }
 
-        
+
         .modal-body .form-horizontal .col-sm-2,
         .modal-body .form-horizontal .col-sm-10 {
             width: 100%
@@ -82,9 +82,8 @@
         }
 
         .form-group label {
-            font-weight:normal !important;
+            font-weight: normal !important;
         }
-       
     </style>
 </head>
 <body>
@@ -115,6 +114,7 @@
                     </div>
                 </div>
             </div>
+            <div id="footer"><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>
         </div>
     </div>
 </body>
@@ -151,7 +151,7 @@
             web3 = new Web3(new Web3.providers.HttpProvider('https://' + net + '.infura.io'));
         }
 
-    
+
 
         if (net === 'mainnet')
             api = 'api';
@@ -173,20 +173,23 @@
 
                 $.each(result, function (index, value) {
                     if (value.constant !== false) {
-                        if (maxDepth > 0 && value.name.toString() === "implementation" && value.inputs.length === 0) {
-                            web3.eth.call({
-                                to: contractAddress,
-                                data: "0x5c60da1b"
-                            }, (error, implementationAddress) => {
-                                if (error) {
-                                    console.error(error);
-                                    return;
-                                }
-                                implementationAddress = web3.toChecksumAddress("0x" + implementationAddress.slice(26));
-                                let implementationSection = NewProxySection(body, implementationAddress);
-                                appendABI(implementationAddress, implementationSection, maxDepth - 1);
-                            });
+                        if (value.name !== undefined) {
+                            if (maxDepth > 0 && value.name.toString() === "implementation" && value.inputs.length === 0) {
+                                web3.eth.call({
+                                    to: contractAddress,
+                                    data: "0x5c60da1b"
+                                }, (error, implementationAddress) => {
+                                    if (error) {
+                                        console.error(error);
+                                        return;
+                                    }
+                                    implementationAddress = web3.toChecksumAddress("0x" + implementationAddress.slice(26));
+                                    let implementationSection = NewProxySection(body, implementationAddress);
+                                    appendABI(implementationAddress, implementationSection, maxDepth - 1);
+                                });
+                            }
                         }
+                        
                         return;
                     }
                     var value_name = value.name.toString();
@@ -203,7 +206,7 @@
 
                     if (isPayable) {
                         inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
-                            '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name +'" placeholder="&nbsp; payableAmount (ether)"></div>';
+                            '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name + '" placeholder="&nbsp; payableAmount (ether)"></div>';
                     }
 
                     if (value.inputs.length > 0) {
@@ -219,7 +222,7 @@
                                 inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
                                 for (d = 0; d < dynamicArray; d++) {
 
-                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter  + '" name="noname" data-grp="g' + counterInput +'" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter + '" name="noname" data-grp="g' + counterInput + '" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
                                 }
 
                                 inputTag += '</div>';
@@ -227,9 +230,9 @@
 
                             } else {
                                 inputTag = GenerateInputTag(inputName, counter, v.type.toString());
-                            }                                   
+                            }
 
-                            inputExtr_WithName += inputTag;                                
+                            inputExtr_WithName += inputTag;
                         });
                     }
 
@@ -256,23 +259,20 @@
                 '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder="&nbsp; ' + inputName + ' (' + type + ')"></div>';
 
         } else {
-           return ' <div class="form-group"><label>' + type + '</label>' +
-                '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type+ '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
+            return ' <div class="form-group"><label>' + type + '</label>' +
+                '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
         }
     }
 
     function GenerateRow(fieldName, outputFieldsWithName, counter, body) {
         if (!hasInput) {
-            hasInput = true;
-
-            var output = "<br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>";
-            body.before(output);
+            hasInput = true;         
 
             header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
         }
         var output = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading' + counter + '"><h4 class="panel-title">' +
             counter + '. <a role="button"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + fieldName + '</a></h4></div>' +
-            '<div id="collapse' + counter +'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
+            '<div id="collapse' + counter + '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
 
         body.before(output);
     }
@@ -280,12 +280,12 @@
     function NewProxySection(body, address) {
         let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '">' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
         body.parent().after(section);
-        return $('#impl'+address);
+        return $('#impl' + address);
     }
 
     function write0(method, input) {
         var functiontoCall = 'myContractInstance.' + method;
-        var params =[];
+        var params = [];
         var ctrl = document.querySelectorAll("[id=" + input + "]");
         var inputs = [];
 
@@ -299,29 +299,29 @@
                 alert('Input value cannot be empty');
                 return false;
             }
-      
+
             var value = strip(ctrl[i].value);
             if (value) {
                 if (type.indexOf('[') !== -1 && type.indexOf(']') !== -1) values.push(value.split(','));
                 else values.push(value);
-            } else values.push('');     
-            
-            inputs.push({ type: type, value: values, grp: grp });            
+            } else values.push('');
+
+            inputs.push({ type: type, value: values, grp: grp });
         }
 
-        var params = encodeParams(inputs);      
+        var params = encodeParams(inputs);
         var payableAmountInput = document.getElementById("input_payable_" + method);
-        var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + Escape(payableAmountInput.value) + ', "ether") }' : ''; 
-        
+        var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + Escape(payableAmountInput.value) + ', "ether") }' : '';
+
         try {
             new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(err, res, '" + input + "'); });")();
-        } catch (err){
-            showTx(err.message,'',input);
+        } catch (err) {
+            showTx(err.message, '', input);
         }
-       
+
     }
 
-    function encodeParams(values) {       
+    function encodeParams(values) {
         var params = '';
 
         if (values.length === 0)
@@ -360,7 +360,7 @@
                     else
                         params = params + ',' + toHex(param.type, Escape(param.value[0]));
                 }
-            }           
+            }
         }
 
         return params;
@@ -372,16 +372,16 @@
             return val.replace(/'/g, "\\u0027");
         else
             return val;
-        
+
     }
 
     function strip(val) {
 
-        
+
         val = val.replace(/"/g, '');
-        val = val.replace('[','');
-        val = val.replace(']','');
-    
+        val = val.replace('[', '');
+        val = val.replace(']', '');
+
 
         return val;
     }
@@ -404,30 +404,30 @@
 
         } else {
             if (type.indexOf('bool') !== -1)
-                return JSON.parse(val);          
+                return JSON.parse(val);
             else if (type.indexOf('address') !== -1)
                 return "'" + add0xforAddress(val) + "'"
             else
                 return "'" + val + "'"
         }
-       
+
     };
 
     function showTx(err, msg, input) {
 
-            if (err) {
-                $('.' + input).html("<font color='red'>" + err + "</font>");
-            } else {
-                var _url = '';
-                if (net !== 'mainnet')
-                    _url = net + ".";
+        if (err) {
+            $('.' + input).html("<font color='red'>" + err + "</font>");
+        } else {
+            var _url = '';
+            if (net !== 'mainnet')
+                _url = net + ".";
 
 
-                if (msg !== undefined)
-                    $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
-            }
-
+            if (msg !== undefined)
+                $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
         }
+
+    }
 
     function connectMetamask() {
 
@@ -477,8 +477,8 @@
                 window.parent.isFrameLoading = false;
                 window.parent.document.getElementById('overlayMain').style.display = 'none';
             }
-          
-        }, 50);  
+
+        }, 50);
 
     }
 
@@ -489,7 +489,7 @@
             if (accounts.length > 0) {
                 address = accounts[0];
                 var isAddress = web3.isAddress(address);
-              
+
                 if (isAddress) {
 
                     var msg = 'Please take note that this is a beta version feature and is provided on an "as is" and "as available" basis. Etherscan does not give any warranties and will not be liable for any loss, direct or indirect through continued use of this feature.';
@@ -535,7 +535,7 @@
         }
     }
 
-    
+
     setTimeout(function () {
         window.parent.writeContractLoaded = true;
         var obj = window.parent.document.getElementById('writecontractiframe');
@@ -545,7 +545,7 @@
             window.parent.isFrameLoading = false;
             window.parent.document.getElementById('overlayMain').style.display = 'none';
         }
-           
-    }, 50);  
+
+    }, 50);
 </script>
 </html>
