@@ -137,6 +137,8 @@
     var contractAddress = getUrlParameter('a');
     var myContract;
     var myContractInstance;
+    var hasInput = false;
+    var api = '';
 
 
     if ((contractAddress !== undefined) || (net !== undefined)) {
@@ -150,14 +152,15 @@
         }
 
     
-        var hasInput = false;
-        var api = '';
 
         if (net === 'mainnet')
             api = 'api';
         else
             api = net;
+        appendABI(contractAddress, body, 5);
+    }
 
+    function appendABI(contractAddress, body, maxDepth) {
         $.getJSON('//' + api + '.etherscan.io/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
             if (data.status == '0') {
                 header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
@@ -169,69 +172,77 @@
                 var maxCounter = 0;
 
                 $.each(result, function (index, value) {
-                    if (value.constant === false) {
-                        var value_name = value.name.toString();
-                        var isPayable = value.payable;
-
-                        if (value_name !== "") {
-                            counter += 1;
-
-                            var counterInput = 0;
-                            var maxItemsInput = value.inputs.length;
-                            var inputExtr_WithName = '';
-
-                            if (isPayable) {
-                                inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
-                                    '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name +'" placeholder="&nbsp; payableAmount (ether)"></div>';
-                            }
-
-                            if (value.inputs.length > 0) {                                                          
-                                $.each(value.inputs, function (i, v) {
-                                    counterInput += 1;
-                                    var inputTag = '';
-                                    var inputName = v.name.toString();
-
-                                    if (v.type.indexOf('][') !== -1) {
-                                        var regex = /\[([0-9,-]+)\]/;
-                                        var dynamicArray = v.type.toString().match(regex)[1];
-                                        var d;
-                                        inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
-                                        for (d = 0; d < dynamicArray; d++) {
-
-                                            inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter  + '" name="noname" data-grp="g' + counterInput +'" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
-                                        }
-
-                                        inputTag += '</div>';
-
-
-                                    } else {
-                                        inputTag = GenerateInputTag(inputName, counter, v.type.toString());
-                                    }                                   
-
-                                    inputExtr_WithName += inputTag;                                
-                                });
-                            }
-
-
-                            inputExtr_WithName += "<button type='button' class='write-btn btn btn-default' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
-
-
-                            GenerateRow(value_name, inputExtr_WithName, counter);
-                            hasInput = true;
+                    if (value.constant !== false) {
+                        if (maxDepth > 0 && value.name.toString() === "implementation" && value.inputs.length === 0) {
+                            web3.eth.call({
+                                to: contractAddress,
+                                data: "0x5c60da1b"
+                            }, (error, implementationAddress) => {
+                                if (error) {
+                                    console.error(error);
+                                    return;
+                                }
+                                implementationAddress = web3.toChecksumAddress("0x" + implementationAddress.slice(26));
+                                let implementationSection = NewProxySection(body, implementationAddress);
+                                appendABI(implementationAddress, implementationSection, maxDepth - 1);
+                            });
                         }
+                        return;
                     }
+                    var value_name = value.name.toString();
+
+                    if (value_name === "") {
+                        return;
+                    }
+                    counter += 1;
+
+                    var isPayable = value.payable;
+                    var counterInput = 0;
+                    var maxItemsInput = value.inputs.length;
+                    var inputExtr_WithName = '';
+
+                    if (isPayable) {
+                        inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
+                            '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name +'" placeholder="&nbsp; payableAmount (ether)"></div>';
+                    }
+
+                    if (value.inputs.length > 0) {
+                        $.each(value.inputs, function (i, v) {
+                            counterInput += 1;
+                            var inputTag = '';
+                            var inputName = v.name.toString();
+
+                            if (v.type.indexOf('][') !== -1) {
+                                var regex = /\[([0-9,-]+)\]/;
+                                var dynamicArray = v.type.toString().match(regex)[1];
+                                var d;
+                                inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
+                                for (d = 0; d < dynamicArray; d++) {
+
+                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter  + '" name="noname" data-grp="g' + counterInput +'" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+                                }
+
+                                inputTag += '</div>';
+
+
+                            } else {
+                                inputTag = GenerateInputTag(inputName, counter, v.type.toString());
+                            }                                   
+
+                            inputExtr_WithName += inputTag;                                
+                        });
+                    }
+
+
+                    inputExtr_WithName += "<button type='button' class='write-btn btn btn-default' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
+
+
+                    GenerateRow(value_name, inputExtr_WithName, counter, body);
 
                 });
 
-                if (hasInput) {
-
-                    var output = "<br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>";
-                    body.before(output);
-
-                    header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
-                }
-                $('.write-btn').hide();
             }
+            $('.write-btn').hide();
 
             var obj = window.parent.document.getElementById('writecontractiframe');
             if (obj !== null)
@@ -250,12 +261,26 @@
         }
     }
 
-    function GenerateRow(fieldName, outputFieldsWithName, counter) {
+    function GenerateRow(fieldName, outputFieldsWithName, counter, body) {
+        if (!hasInput) {
+            hasInput = true;
+
+            var output = "<br><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>";
+            body.before(output);
+
+            header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
+        }
         var output = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading' + counter + '"><h4 class="panel-title">' +
             counter + '. <a role="button"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + fieldName + '</a></h4></div>' +
             '<div id="collapse' + counter +'" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
 
         body.before(output);
+    }
+
+    function NewProxySection(body, address) {
+        let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '">' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
+        body.parent().after(section);
+        return $('#impl'+address);
     }
 
     function write0(method, input) {
@@ -511,16 +536,16 @@
     }
 
     
-     setTimeout(function () {
-            window.parent.writeContractLoaded = true;
-         var obj = window.parent.document.getElementById('writecontractiframe');
+    setTimeout(function () {
+        window.parent.writeContractLoaded = true;
+        var obj = window.parent.document.getElementById('writecontractiframe');
 
-         if (obj !== null) {
-             parent.resizeIframe(obj, 0);
-             window.parent.isFrameLoading = false;
-             window.parent.document.getElementById('overlayMain').style.display = 'none';
-         }
+        if (obj !== null) {
+            parent.resizeIframe(obj, 0);
+            window.parent.isFrameLoading = false;
+            window.parent.document.getElementById('overlayMain').style.display = 'none';
+        }
            
-        }, 50);  
+    }, 50);  
 </script>
 </html>
