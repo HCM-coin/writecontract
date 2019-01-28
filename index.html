@@ -30,6 +30,7 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Tfj13fqQQqqzQFuaZ81WDzmmOU610WeS08VMuHmElK5oI2f7NwojuL6VupYXR/jK" crossorigin="anonymous">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
+
         html * {
             font-size: 13px !important;
             overflow-wrap: break-word;
@@ -106,7 +107,6 @@
                             <div class="col-md-12">
                                 <div class="row">
                                     <div class="panel-group acc-v1" id="accordion" role="tablist" aria-multiselectable="true">
-
                                     </div>
                                 </div>
                             </div>
@@ -114,14 +114,14 @@
                     </div>
                 </div>
             </div>
-            <div id="footer"><p align='right'>Powered by <a href='https://etherscan.io'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>
+            <div id="footer">
+                <p align='right'>Powered by <a href='https://etherscan.io' target='_parent'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>
+            </div>
         </div>
-    </div>
 </body>
 <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" integrity="sha384-4Kp4aQ6UNeqsJ/ithPcxYnnIGt/QJJ64J9QtfDAJZUTaePAIPm9aaBdu7Gw84oGs" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
-
 <script>
 
     jQuery(window).load(function () {
@@ -189,7 +189,7 @@
                                 });
                             }
                         }
-                        
+
                         return;
                     }
                     var value_name = value.name.toString();
@@ -266,7 +266,7 @@
 
     function GenerateRow(fieldName, outputFieldsWithName, counter, body) {
         if (!hasInput) {
-            hasInput = true;         
+            hasInput = true;
 
             header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
         }
@@ -278,7 +278,7 @@
     }
 
     function NewProxySection(body, address) {
-        let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '">' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
+        let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '#writeContract" target="_blank" >' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
         body.parent().after(section);
         return $('#impl' + address);
     }
