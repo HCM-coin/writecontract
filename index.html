@@ -26,36 +26,38 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
-    <link rel='stylesheet' type='text/css' href='https://fonts.googleapis.com/css?family=Open+Sans:400,300,600&amp;subset=cyrillic,latin'>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Tfj13fqQQqqzQFuaZ81WDzmmOU610WeS08VMuHmElK5oI2f7NwojuL6VupYXR/jK" crossorigin="anonymous">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
-    <style>
-
-        html * {
-            font-size: 13px !important;
-            overflow-wrap: break-word;
-            word-wrap: break-word;
-            -ms-word-break: break-all;
-            word-break: break-all;
-            word-break: break-word;
-            -ms-hyphens: auto;
-            -moz-hyphens: auto;
-            -webkit-hyphens: auto;
-            hyphens: auto;
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+    <style type="text/css">
+        html {
+            font-size: 13px;
         }
 
-
-        .modal-body .form-horizontal .col-sm-2,
-        .modal-body .form-horizontal .col-sm-10 {
-            width: 100%
+        body {
+            font-family: Helvetica Neue,Helvetica,Arial,sans-serif;
         }
 
-        .modal-body .form-horizontal .control-label {
-            text-align: left;
+        a {
+            color: #3498db;
         }
 
-        .modal-body .form-horizontal .col-sm-offset-2 {
-            margin-left: 15px;
+            a:hover {
+                color: #1d6fa5;
+            }
+
+        .text-primary {
+            color: #3498db !important;
+        }
+
+        .btn-link:hover {
+            color: #1d6fa5;
+            text-decoration: none;
+        }
+
+        .card-btn-arrow {
+            display: inline-block;
+            color: #3498db;
+            margin-top: 5px;
         }
 
         #overlay {
@@ -74,6 +76,97 @@
             display: none;
         }
 
+        .accordion-arrow {
+            display: inline-block;
+            transition: 0.3s ease-in-out;
+        }
+
+        .collapsed .accordion-arrow {
+            transform: rotate(-90deg);
+        }
+
+        body.dark-mode {
+            color: #a2b9c8;
+            background-color: #01263f !important;
+        }
+
+            body.dark-mode .bg-light {
+                background-color: #01263f !important
+            }
+
+            body.dark-mode .text-secondary {
+                color: #7295ac !important
+            }
+
+           
+            body.dark-mode .border, body.dark-mode .border-bottom, body.dark-mode .border-top, body.dark-mode .u-ver-divider--left:after, body.dark-mode .u-ver-divider:after {
+                border-color: #013558 !important
+            }
+
+            body.dark-mode p {
+                color: #a2b9c8
+            }
+
+            body.dark-mode .modal-footer, body.dark-mode .modal-header {
+                border-color: #013558
+            }
+
+            body.dark-mode .card {
+                border-color: transparent !important;
+                background-color: #012137 !important;
+                box-shadow: 0 .5rem 1.2rem rgba(4,76,124,.2)
+            }
+
+            body.dark-mode .card-header {
+                background-color: #012137 !important;
+                border-color: #013558
+            }
+
+            body.dark-mode .card-header-title {
+                color: #a2b9c8
+            }
+
+            body.dark-mode .card-btn {
+                color: #a2b9c8
+            }
+
+            body.dark-mode .form-control::-webkit-input-placeholder {
+                color: #577c93
+            }
+
+            body.dark-mode .form-control::-moz-placeholder {
+                color: #577c93
+            }
+
+            body.dark-mode .form-control::-ms-input-placeholder {
+                color: #577c93
+            }
+
+            body.dark-mode .form-control::placeholder {
+                color: #577c93
+            }
+
+            body.dark-mode .link-hover-secondary, body.dark-mode .text-dark, body.dark-mode .text-link, body.dark-mode .text-muted, body.dark-mode .text-white {
+                color: #a2b9c8 !important
+            }
+
+            body.dark-mode .custom-select, body.dark-mode .form-control, body.dark-mode .input-group-text {
+                color: #a2b9c8 !important;
+                border-color: #013558 !important;
+                background-color: #01263f !important
+            }
+
+            body.dark-mode .btn-primary, body.dark-mode .btn-primary:not([href]), body.dark-mode .btn-primary:not([href]):not([href]):not(:disabled):not(.disabled) {
+                color: rgba(255, 255, 255, 0.8);
+                background-color: rgba(52, 152, 219, 0.2);
+                border-color: rgba(52, 152, 219, 0.2);
+            }
+
+                body.dark-mode .btn-primary:focus, body.dark-mode .btn-primary:hover, body.dark-mode .btn-primary:not([href]):focus, body.dark-mode .btn-primary:not([href]):hover, body.dark-mode .btn-primary:not([href]):not([href]):not(:disabled):not(.disabled):focus, body.dark-mode .btn-primary:not([href]):not([href]):not(:disabled):not(.disabled):hover {
+                    color: white;
+                    background-color: #3498db;
+                }
+
         .badge-red {
             background: #e74c3c;
         }
@@ -81,54 +174,41 @@
         .badge-green {
             background: rgb(0,128,0);
         }
-
-        .form-group label {
-            font-weight: normal !important;
-        }
     </style>
 </head>
 <body>
-    <div id="overlay">
-        <img src="ajax-loader.gif" alt="Loading" style="margin-bottom:20px"><br />
-        ... loading, please wait ...
+    <div id="overlay" class="py-3 text-center">
+        <img src="/images/main/loadingblock.svg" alt="Loading" />
     </div>
-    <div style="margin-left: 3px; margin-right: 3px">
-        <div style="margin-left: 25px; margin-right: 25px">
-            <div class="panel-group acc-v1" id="accordion-1">
-                <div class="container-fluid">
-                    <div class="row">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="row header" style="position: fixed; width:100%; z-index: 10; background:#fff;">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row" style="padding-top:54px;">
-                            <div class="col-md-12">
-                                <div class="row">
-                                    <div class="panel-group acc-v1" id="accordion" role="tablist" aria-multiselectable="true">
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="footer">
-                <p align='right'>Powered by <a href='https://etherscan.io' target='_parent'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>
-            </div>
-        </div>
-</body>
-<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js" integrity="sha384-4Kp4aQ6UNeqsJ/ithPcxYnnIGt/QJJ64J9QtfDAJZUTaePAIPm9aaBdu7Gw84oGs" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js/dist/web3.min.js"></script>
-<script>
+    <div id="header">
+    </div>
+    <div class="panel-group acc-v1" id="accordion" role="tablist" aria-multiselectable="true">
 
+    </div>
+    <div id="footer" class="mr-3" style="display:none">
+        <p align='right'>Powered by <a href='https://etherscan.io' target='_parent'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>
+    </div>
+</body>
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+<script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@0.20.6/dist/web3.js"></script>
+
+<script>
+    var mode = getParameterByName("m");
     jQuery(window).load(function () {
         jQuery('#overlayMain').fadeOut();
+        window.parent.document.getElementById('loadingWriteContractframe').style.display = "none";
+        window.parent.document.getElementById('overlayMain').style.display = 'none';
+
+        if (mode === "dark") {
+            var src = $('body');
+            src.addClass('dark-mode');
+        }
     });
 
-    var header = $('.row .header');
+    var header = $('#header');
     var body = $('#accordion');
     var net = getUrlParameter('n');
     var address;
@@ -139,7 +219,7 @@
     var myContractInstance;
     var hasInput = false;
     var api = '';
-
+    var isAccount = false;
 
     if ((contractAddress !== undefined) || (net !== undefined)) {
 
@@ -148,7 +228,7 @@
         } else if (typeof web3 !== 'undefined') {
             web3 = new Web3(web3.currentProvider);
         } else {
-            web3 = new Web3(new Web3.providers.HttpProvider('https://' + net + '.infura.io'));
+            web3 = new Web3(new Web3.providers.HttpProvider('https://' + net + '.infura.io/v3/80f1c00345214da4bdbc4d02f35fb265'));
         }
 
 
@@ -158,12 +238,13 @@
         else
             api = net;
         appendABI(contractAddress, body, 5);
+        
     }
 
     function appendABI(contractAddress, body, maxDepth) {
         $.getJSON('//' + api + '.etherscan.io/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
             if (data.status == '0') {
-                header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract2?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
+                header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
 
             } else {
 
@@ -178,14 +259,17 @@
                                 web3.eth.call({
                                     to: contractAddress,
                                     data: "0x5c60da1b"
-                                }, (error, implementationAddress) => {
+                                }, function (error, implementationAddress) {
                                     if (error) {
                                         console.error(error);
                                         return;
                                     }
                                     implementationAddress = web3.toChecksumAddress("0x" + implementationAddress.slice(26));
-                                    let implementationSection = NewProxySection(body, implementationAddress);
-                                    appendABI(implementationAddress, implementationSection, maxDepth - 1);
+
+                                    if (implementationAddress !== "0x") {
+                                        let implementationSection = NewProxySection(body, implementationAddress);
+                                        appendABI(implementationAddress, implementationSection, maxDepth - 1);
+                                    }
                                 });
                             }
                         }
@@ -206,7 +290,7 @@
 
                     if (isPayable) {
                         inputExtr_WithName += ' <div class="form-group"><label>' + value_name + ' </label>' +
-                            '<input type="text" class="form-control" id="input_payable_' + value_name + '" name="payable_' + value_name + '" placeholder="&nbsp; payableAmount (ether)"></div>';
+                            '<input type="text" class="form-control form-control-xs" id="input_payable_' + value_name + '" name="payable_' + value_name + '" placeholder="&nbsp; payableAmount (ether)"></div>';
                     }
 
                     if (value.inputs.length > 0) {
@@ -222,7 +306,7 @@
                                 inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
                                 for (d = 0; d < dynamicArray; d++) {
 
-                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control" id="input_' + counter + '" name="noname" data-grp="g' + counterInput + '" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control form-control-xs" id="input_' + counter + '" name="noname" data-grp="g' + counterInput + '" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
                                 }
 
                                 inputTag += '</div>';
@@ -237,15 +321,16 @@
                     }
 
 
-                    inputExtr_WithName += "<button type='button' class='write-btn btn btn-default' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
+                    inputExtr_WithName += "<button type='button' class='write-btn btn btn-xs btn-primary border' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
 
 
                     GenerateRow(value_name, inputExtr_WithName, counter, body);
 
                 });
 
+                $('#footer').show();
             }
-            $('.write-btn').hide();
+            $('.write-btn').addClass('disabled');
 
             var obj = window.parent.document.getElementById('writecontractiframe');
             if (obj !== null)
@@ -256,11 +341,11 @@
     function GenerateInputTag(inputName, counter, type) {
         if (inputName !== "") {
             return ' <div class="form-group"><label>' + inputName + ' (' + type + ') </label>' +
-                '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder="&nbsp; ' + inputName + ' (' + type + ')"></div>';
+                '<input type="text" class="form-control form-control-xs" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder="&nbsp; ' + inputName + ' (' + type + ')"></div>';
 
         } else {
             return ' <div class="form-group"><label>' + type + '</label>' +
-                '<input type="text" class="form-control" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
+                '<input type="text" class="form-control form-control-xs" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
         }
     }
 
@@ -268,22 +353,32 @@
         if (!hasInput) {
             hasInput = true;
 
-            header.append("<br><span id='connector' title='Disconnect' style='padding: 1px 5px;' class='badge rounded-2x badge-red'>&nbsp;</span> Write Contract  <a id='connectMetamask' style='font-size:12px !important' href='#' onclick='connectMetamask();return false;'>Connect with Metamask</a> <span class='pull-right' style='margin-right:35px;'>[<a href='?a=" + contractAddress + "&n=" + net + "'>Reset</a>]</span><br><br>");
+            header.append('<div class="alert bg-light border"><p class="mb-0"><i class="fas fa-magic text-primary mr-1"></i> <strong>Feature Tip:</strong> <a class="font-weight-bold" href="/dapp/' + contractAddress + '"  target="_parent">Etherscan Dapp Page</a> - A new front-end interface for any smart contract on Ethereum!</p></div>')
+            header.append('<div class="d-sm-flex justify-content-between mb-3"><p class="ml-3 mr-3 mb-1"><i id="connector" class="fa fa-circle text-danger mr-1"></i> Write Contract <a id="connectWeb3" style="font-size: 12px!important" href="#" onclick="connectWeb3(); return false;">Connect to Web3</a ></p><a class="ml-3 mr-3" href="?m=' + mode + '&a=' + contractAddress + '&n=' + net + '">[Reset]</a></div >');
+
         }
-        var output = '<div class="panel panel-default"><div class="panel-heading" role="tab" id="heading' + counter + '"><h4 class="panel-title">' +
-            counter + '. <a role="button"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + fieldName + '</a></h4></div>' +
-            '<div id="collapse' + counter + '" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="panel-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
+        var output = '<div class="card shadow-none mb-3"><div class="card-header bg-light card-collapse p-0" role="tab" id="heading' + counter + '">' +
+            '<a role="button" class="btn btn-link btn-block text-dark d-flex justify-content-between align-items-center py-2"  data-toggle="collapse" data-parent="#accordion" href="#collapse' + counter + '" aria-expanded="true" aria-controls="collapse' + counter + '">' + counter + '. ' + fieldName + '<span class="accordion-arrow"><i class="fas fa-arrow-down small"></i></span></a></div>' +
+            '<div id="collapse' + counter + '" class="collapse show" role="tabpanel" aria-labelledby="heading' + counter + '"><div class="card-body"><form>' + outputFieldsWithName + '</form></div></div></div>';
 
         body.before(output);
     }
 
     function NewProxySection(body, address) {
-        let section = '<div class="row"><p>Showing ABI for possible implementation <a href="/address/' + address + '#writeContract" target="_blank" >' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div></div>';
-        body.parent().after(section);
+        let section = '<p>Showing ABI for possible implementation <a href="/address/' + address + '#writeContract" target="_blank" >' + address + '</a></p><div class="panel-group acc-v1" id="impl' + address + '" role="tablist" aria-multiselectable="true"></div>';
+        $("#footer").before(section);
         return $('#impl' + address);
     }
 
     function write0(method, input) {
+
+        if (isAccount === false) {
+            alert("Please connect to your Web3 provider");
+
+            return;
+        }
+
+
         var functiontoCall = 'myContractInstance.' + method;
         var params = [];
         var ctrl = document.querySelectorAll("[id=" + input + "]");
@@ -332,7 +427,7 @@
 
             if (param.value !== '') {
                 if (param.grp !== null) {
-                    var _grp = values.filter(x => x.grp == param.grp);
+                    var _grp = values.filter(function (x) { return x.grp == param.grp });
                     var _grpParam = '';
 
                     for (g = 0; g < _grp.length; g++) {
@@ -416,7 +511,7 @@
     function showTx(err, msg, input) {
 
         if (err) {
-            $('.' + input).html("<font color='red'>" + err + "</font>");
+            $('.' + input).html("<span class='text-danger'>" + err + "</span>");
         } else {
             var _url = '';
             if (net !== 'mainnet')
@@ -429,47 +524,46 @@
 
     }
 
-    function connectMetamask() {
-
+    function connectWeb3() {
         var network = 0;
-        web3.version.getNetwork((err, netId) => {
+        web3.version.getNetwork(function (err, netId) {
             network = netId;
             switch (netId) {
                 case "1":
-                    network = 'mainnet'
-                    break
+                    network = 'mainnet';
+                    break;
                 case "2":
-                    network = 'morden'
-                    break
+                    network = 'morden';
+                    break;
                 case "3":
                     network = 'ropsten';
-                    break
+                    break;
                 case "4":
                     network = 'rinkeby';
-                    break
+                    break;
                 case "5":
                     network = 'goerli';
                     break;
                 case "42":
                     network = 'kovan';
-                    break
+                    break;
                 default:
-                    console.log('This is an unknown network.')
+                    console.log('This is an unknown network.');
             }
 
             if (network.toLowerCase() !== net.toLowerCase()) {
-                alert("Please connect metamask to " + net + ' network');
+                alert("Please connect your Web3 to " + net + ' network');
                 return false;
             } else {
                 if (typeof ethereum !== 'undefined') {
                     ethereum.enable().then(function () {
-                        getMetamaskAccounts()
+                        getWeb3Accounts();
                     });
                 } else {
-                    getMetamaskAccounts()
+                    getWeb3Accounts();
                 }
             }
-        })
+        });
 
         setTimeout(function () {
             window.parent.writeContractLoaded = true;
@@ -480,12 +574,10 @@
                 window.parent.isFrameLoading = false;
                 window.parent.document.getElementById('overlayMain').style.display = 'none';
             }
-
         }, 50);
-
     }
 
-    function getMetamaskAccounts() {
+    function getWeb3Accounts() {
         web3.eth.getAccounts(function (err, accounts) {
             if (err) alert(err + '. Are you sure you are on a secure (SSL / HTTPS) connection?');
 
@@ -499,18 +591,22 @@
 
                     if (confirm(msg)) {
                         $('.write-btn').show();
-                        $('#connectMetamask').hide();
+                        $('#connectWeb3').hide();
                         web3.eth.defaultAccount = accounts[0];
 
                         myContract = web3.eth.contract(ABI);
                         myContractInstance = myContract.at(contractAddress);
 
-                        $('#connector').removeClass("badge-red").addClass("badge-green");
+                        $('#connector').removeClass("text-danger").addClass("text-success");
                         $('#connector').attr('title', 'Connected');
+
+                        $('.write-btn').removeClass("disabled");
                     }
+
+                    isAccount = true;
                 }
             } else {
-                alert('Metamask is not enabled');
+                alert('Web3 provider is not enabled');
             }
         });
     }
@@ -550,5 +646,23 @@
         }
 
     }, 50);
+    function getParameterByName(name) {
+        var url = window.location.href;
+        name = name.replace(/[\[\]]/g, "\\$&");
+        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+            results = regex.exec(url);
+        if (!results) return null;
+        if (!results[2]) return '';
+        return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+
+    $(document).ready(function () {
+        $(window).keydown(function (event) {
+            if (event.keyCode == 13) {
+                event.preventDefault();
+                return false;
+            }
+        });
+    });
 </script>
 </html>
