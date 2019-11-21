@@ -193,7 +193,10 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@0.20.6/dist/web3.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.0/dist/web3.min.js"></script>
+<!-- for some reason version > 1.2.2 breaks with "require is not defined" (v1.2.1 breaks per issue https://github.com/ethereum/web3.js/issues/3074) -->
+<!-- to confirm with web3js -->
+
 
 <script>
     var mode = getParameterByName("m");
@@ -236,7 +239,7 @@
         if (net === 'mainnet')
             api = 'api';
         else
-            api = net;
+            api = "api-" + net;
         appendABI(contractAddress, body, 5);
         
     }
@@ -379,7 +382,7 @@
         }
 
 
-        var functiontoCall = 'myContractInstance.' + method;
+        var functiontoCall = 'myContractInstance.methods.' + method;
         var params = [];
         var ctrl = document.querySelectorAll("[id=" + input + "]");
         var inputs = [];
@@ -409,7 +412,9 @@
         var payableParam = payableAmountInput && !isNaN(payableAmountInput.value) ? ', { value: web3.toWei(' + Escape(payableAmountInput.value) + ', "ether") }' : '';
 
         try {
-            new Function(functiontoCall + "(" + params + payableParam + ", function(err, res){ showTx(err, res, '" + input + "'); });")();
+            new Function(functiontoCall + "(" + params + payableParam + ").send({ from:'" + web3.eth.defaultAccount + "'})" +
+                                            ".on('transactionHash', function(hash) { showTx('', hash, '" + input + "'); })" + 
+                                            ".on('error', function(error) { showTx(error, '', '" + input + "') });")();
         } catch (err) {
             showTx(err.message, '', input);
         }
@@ -524,46 +529,46 @@
 
     }
 
-    function connectWeb3() {
-        var network = 0;
-        web3.version.getNetwork(function (err, netId) {
-            network = netId;
-            switch (netId) {
-                case "1":
-                    network = 'mainnet';
-                    break;
-                case "2":
-                    network = 'morden';
-                    break;
-                case "3":
-                    network = 'ropsten';
-                    break;
-                case "4":
-                    network = 'rinkeby';
-                    break;
-                case "5":
-                    network = 'goerli';
-                    break;
-                case "42":
-                    network = 'kovan';
-                    break;
-                default:
-                    console.log('This is an unknown network.');
-            }
+    async function connectWeb3() {
+        var network = "0";
+        network = await web3.eth.net.getId();
+        netID = network.toString();
 
-            if (network.toLowerCase() !== net.toLowerCase()) {
-                alert("Please connect your Web3 to " + net + ' network');
-                return false;
-            } else {
-                if (typeof ethereum !== 'undefined') {
-                    ethereum.enable().then(function () {
-                        getWeb3Accounts();
-                    });
-                } else {
+        switch (netID) {
+            case "1":
+                network = 'mainnet';
+                break;
+            case "2":
+                network = 'morden';
+                break;
+            case "3":
+                network = 'ropsten';
+                break;
+            case "4":
+                network = 'rinkeby';
+                break;
+            case "5":
+                network = 'goerli';
+                break;
+            case "42":
+                network = 'kovan';
+                break;
+            default:
+                console.log('This is an unknown network.');
+        }
+
+        if (network.toLowerCase() !== net.toLowerCase()) {
+            alert("Please connect your Web3 to " + net + ' network');
+            return false;
+        } else {
+            if (typeof ethereum !== 'undefined') {
+                ethereum.enable().then(function () {
                     getWeb3Accounts();
-                }
+                });
+            } else {
+                getWeb3Accounts();
             }
-        });
+        }
 
         setTimeout(function () {
             window.parent.writeContractLoaded = true;
@@ -575,7 +580,7 @@
                 window.parent.document.getElementById('overlayMain').style.display = 'none';
             }
         }, 50);
-    }
+    };
 
     function getWeb3Accounts() {
         web3.eth.getAccounts(function (err, accounts) {
@@ -583,7 +588,7 @@
 
             if (accounts.length > 0) {
                 address = accounts[0];
-                var isAddress = web3.isAddress(address);
+                var isAddress = web3.utils.isAddress(address);
 
                 if (isAddress) {
 
@@ -594,8 +599,7 @@
                         $('#connectWeb3').hide();
                         web3.eth.defaultAccount = accounts[0];
 
-                        myContract = web3.eth.contract(ABI);
-                        myContractInstance = myContract.at(contractAddress);
+                        myContractInstance = new web3.eth.Contract(ABI, contractAddress);
 
                         $('#connector').removeClass("text-danger").addClass("text-success");
                         $('#connector').attr('title', 'Connected');
