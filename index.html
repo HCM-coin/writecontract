@@ -29,6 +29,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
     <style type="text/css">
+
         html {
             font-size: 13px;
         }
@@ -98,7 +99,7 @@
                 color: #7295ac !important
             }
 
-           
+
             body.dark-mode .border, body.dark-mode .border-bottom, body.dark-mode .border-top, body.dark-mode .u-ver-divider--left:after, body.dark-mode .u-ver-divider:after {
                 border-color: #013558 !important
             }
@@ -183,20 +184,17 @@
     <div id="header">
     </div>
     <div class="panel-group acc-v1" id="accordion" role="tablist" aria-multiselectable="true">
-
     </div>
     <div id="footer" class="mr-3" style="display:none">
         <p align='right'>Powered by <a href='https://etherscan.io' target='_parent'>Etherscan.io</a>. Browse <a href='https://github.com/etherscan/writecontract' target='_blank'>source code</a></p>
     </div>
 </body>
-
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://code.jquery.com/jquery-migrate-1.4.1.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js" integrity="sha384-xrRywqdh3PHs8keKZN+8zzc5TX0GRTLCcmivcbNJWm2rs5C8PRhcEn3czEjhAO9o" crossorigin="anonymous"></script>
 <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.2.0/dist/web3.min.js"></script>
 <!-- for some reason version > 1.2.2 breaks with "require is not defined" (v1.2.1 breaks per issue https://github.com/ethereum/web3.js/issues/3074) -->
 <!-- to confirm with web3js -->
-
 
 <script>
     var mode = getParameterByName("m");
@@ -244,12 +242,12 @@
         else if (net == 'ecw')
             api = '//api-ewc.etherscan.com';
         else
-            api = '//api-' + net +'.etherscan.io';
-        appendABI(contractAddress, body, 5);
-        
+            api = '//api-' + net + '.etherscan.io';
+        appendABI(contractAddress, body, 5, false);
+
     }
 
-    function appendABI(contractAddress, body, maxDepth) {
+    function appendABI(contractAddress, body, maxDepth, isProxy) {
         $.getJSON(api + '/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
             if (data.status == '0') {
                 header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
@@ -272,11 +270,11 @@
                                         console.error(error);
                                         return;
                                     }
-                                    implementationAddress = web3.toChecksumAddress("0x" + implementationAddress.slice(26));
+                                    implementationAddress = web3.utils.toChecksumAddress("0x" + implementationAddress.slice(26));
 
                                     if (implementationAddress !== "0x") {
                                         let implementationSection = NewProxySection(body, implementationAddress);
-                                        appendABI(implementationAddress, implementationSection, maxDepth - 1);
+                                        appendABI(implementationAddress, implementationSection, maxDepth - 1, true);
                                     }
                                 });
                             }
@@ -301,6 +299,12 @@
                             '<input type="text" class="form-control form-control-xs" id="input_payable_' + value_name + '" name="payable_' + value_name + '" placeholder="&nbsp; payableAmount (ether)"></div>';
                     }
 
+
+                    var inputId = "input_" + counter;
+                    if (isProxy)
+                        inputId += "_proxy_" + maxDepth;
+
+
                     if (value.inputs.length > 0) {
                         $.each(value.inputs, function (i, v) {
                             counterInput += 1;
@@ -314,14 +318,25 @@
                                 inputTag = ' <div class="form-group"><label>' + inputName + ' (' + v.type.toString() + ') </label>';
                                 for (d = 0; d < dynamicArray; d++) {
 
-                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control form-control-xs" id="input_' + counter + '" name="noname" data-grp="g' + counterInput + '" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+
+                                  
+                                    var counterInputGroup = "g" + counterInput;
+
+                                    if (isProxy) {                                    
+                                        counterInputGroup += "_proxy_" + maxDepth;
+                                    }
+                                       
+                                    inputTag += '<input type="text" style="margin-bottom:5px" class="form-control form-control-xs" id="' + inputId + '" name="noname" data-grp="' + counterInputGroup + '" data-type="' + v.type.toString() + '" placeholder="&nbsp; ' + inputName + '[]">';
+                                   
                                 }
 
                                 inputTag += '</div>';
 
 
                             } else {
-                                inputTag = GenerateInputTag(inputName, counter, v.type.toString());
+                               
+
+                                inputTag = GenerateInputTag(inputName, inputId, v.type.toString(), isProxy, maxDepth);
                             }
 
                             inputExtr_WithName += inputTag;
@@ -329,7 +344,7 @@
                     }
 
 
-                    inputExtr_WithName += "<button type='button' class='write-btn btn btn-xs btn-primary border' onclick=\"write0('" + value_name + "', 'input_" + counter + "');\">Write</button> <div style='display:inline' class='write-msg text-success input_" + counter + "'></div>";
+                    inputExtr_WithName += "<button type='button' class='write-btn btn btn-xs btn-primary border' onclick=\"write0('" + value_name + "', '" + inputId + "');\">Write</button> <div style='display:inline' class='write-msg text-success " + inputId + "'></div>";
 
 
                     GenerateRow(value_name, inputExtr_WithName, counter, body);
@@ -346,14 +361,14 @@
         });
     }
 
-    function GenerateInputTag(inputName, counter, type) {
+    function GenerateInputTag(inputName, inputId, type) {
         if (inputName !== "") {
             return ' <div class="form-group"><label>' + inputName + ' (' + type + ') </label>' +
-                '<input type="text" class="form-control form-control-xs" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder="&nbsp; ' + inputName + ' (' + type + ')"></div>';
+                '<input type="text" class="form-control form-control-xs" id="' + inputId + '" name="noname" data-type="' + type + '" placeholder="&nbsp; ' + inputName + ' (' + type + ')"></div>';
 
         } else {
             return ' <div class="form-group"><label>' + type + '</label>' +
-                '<input type="text" class="form-control form-control-xs" id="input_' + counter + '" name="noname" data-type="' + type + '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
+                '<input type="text" class="form-control form-control-xs" id="' + inputId + '" name="noname" data-type="' + type + '" placeholder=" &nbsp; &lt;input&gt (' + type + ')"></div>';
         }
     }
 
@@ -418,8 +433,8 @@
 
         try {
             new Function(functiontoCall + "(" + params + payableParam + ").send({ from:'" + web3.eth.defaultAccount + "'})" +
-                                            ".on('transactionHash', function(hash) { showTx('', hash, '" + input + "'); })" + 
-                                            ".on('error', function(error) { showTx(error, '', '" + input + "') });")();
+                ".on('transactionHash', function(hash) { showTx('', hash, '" + input + "'); })" +
+                ".on('error', function(error) { showTx(error, '', '" + input + "') });")();
         } catch (err) {
             showTx(err.message, '', input);
         }
@@ -528,7 +543,7 @@
                 _url = "ewc.etherscan.com";
             else if (net !== 'mainnet')
                 _url = net + ".etherscan.io"
-           
+
 
             if (msg !== undefined)
                 $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "/tx/" + msg + "' target='_blank'> View your transaction</a>");
@@ -536,35 +551,38 @@
 
     }
 
-    function connectWeb3() {
+    async function connectWeb3() {
         var network = 0;
-        web3.version.getNetwork(function (err, netId) {
-            network = netId;
-            switch (netId) {
-                case "1":
-                    network = 'mainnet';
-                    break;
-                case "2":
-                    network = 'morden';
-                    break;
-                case "3":
-                    network = 'ropsten';
-                    break;
-                case "4":
-                    network = 'rinkeby';
-                    break;
-                case "5":
-                    network = 'goerli';
-                    break;
-                case "42":
-                    network = 'kovan';
-                    break;
-                case "246":
-                    network = 'ecw';
-                    break;
-                default:
-                    console.log('This is an unknown network.');
-            }
+
+        network = await web3.eth.net.getId();
+        netID = network.toString();
+
+
+        switch (netID) {
+            case "1":
+                network = 'mainnet';
+                break;
+            case "2":
+                network = 'morden';
+                break;
+            case "3":
+                network = 'ropsten';
+                break;
+            case "4":
+                network = 'rinkeby';
+                break;
+            case "5":
+                network = 'goerli';
+                break;
+            case "42":
+                network = 'kovan';
+                break;
+            case "246":
+                network = 'ecw';
+                break;
+            default:
+                console.log('This is an unknown network.');
+        }
 
         if (network.toLowerCase() !== net.toLowerCase()) {
             alert("Please connect your Web3 to " + net + ' network');
@@ -589,7 +607,7 @@
                 window.parent.document.getElementById('overlayMain').style.display = 'none';
             }
         }, 50);
-    };
+    }
 
     function getWeb3Accounts() {
         web3.eth.getAccounts(function (err, accounts) {
