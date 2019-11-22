@@ -224,6 +224,9 @@
     var api = '';
     var isAccount = false;
 
+    if (net == 'tobalaba')
+        net = 'ecw';
+
     if ((contractAddress !== undefined) || (net !== undefined)) {
 
         if (typeof ethereum !== 'undefined') {
@@ -237,15 +240,17 @@
 
 
         if (net === 'mainnet')
-            api = 'api';
+            api = '//api.etherscan.io';
+        else if (net == 'ecw')
+            api = '//api-ewc.etherscan.com';
         else
-            api = "api-" + net;
+            api = '//api-' + net +'.etherscan.io';
         appendABI(contractAddress, body, 5);
         
     }
 
     function appendABI(contractAddress, body, maxDepth) {
-        $.getJSON('//' + api + '.etherscan.io/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
+        $.getJSON(api + '/api?module=contract&action=getabi&address=' + contractAddress, function (data) {
             if (data.status == '0') {
                 header.append("<br><i Class='fa fa-frown-o'></i>  Sorry, we were unable to locate a matching Contract ABI or SourceCode for this contract.<br><br>If you are the contract owner, please <a href='https://etherscan.io/verifyContract?a=" + contractAddress + "' target='_parent'>Verify Your Contract Source Code</a> here.");
 
@@ -376,7 +381,7 @@
     function write0(method, input) {
 
         if (isAccount === false) {
-            alert("Please connect to your Web3 provider");
+            alert("Please connect to your Web3 provider!");
 
             return;
         }
@@ -518,44 +523,48 @@
         if (err) {
             $('.' + input).html("<span class='text-danger'>" + err + "</span>");
         } else {
-            var _url = '';
-            if (net !== 'mainnet')
-                _url = net + ".";
-
+            var _url = 'etherscan.io';
+            if (net !== 'mainnet' && net == 'tobalaba')
+                _url = "ewc.etherscan.com";
+            else if (net !== 'mainnet')
+                _url = net + ".etherscan.io"
+           
 
             if (msg !== undefined)
-                $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "etherscan.io/tx/" + msg + "' target='_blank'> View your transaction</a>");
+                $('.' + input).html("<a class='btn btn-primary' href='//" + _url + "/tx/" + msg + "' target='_blank'> View your transaction</a>");
         }
 
     }
 
-    async function connectWeb3() {
-        var network = "0";
-        network = await web3.eth.net.getId();
-        netID = network.toString();
-
-        switch (netID) {
-            case "1":
-                network = 'mainnet';
-                break;
-            case "2":
-                network = 'morden';
-                break;
-            case "3":
-                network = 'ropsten';
-                break;
-            case "4":
-                network = 'rinkeby';
-                break;
-            case "5":
-                network = 'goerli';
-                break;
-            case "42":
-                network = 'kovan';
-                break;
-            default:
-                console.log('This is an unknown network.');
-        }
+    function connectWeb3() {
+        var network = 0;
+        web3.version.getNetwork(function (err, netId) {
+            network = netId;
+            switch (netId) {
+                case "1":
+                    network = 'mainnet';
+                    break;
+                case "2":
+                    network = 'morden';
+                    break;
+                case "3":
+                    network = 'ropsten';
+                    break;
+                case "4":
+                    network = 'rinkeby';
+                    break;
+                case "5":
+                    network = 'goerli';
+                    break;
+                case "42":
+                    network = 'kovan';
+                    break;
+                case "246":
+                    network = 'ecw';
+                    break;
+                default:
+                    console.log('This is an unknown network.');
+            }
 
         if (network.toLowerCase() !== net.toLowerCase()) {
             alert("Please connect your Web3 to " + net + ' network');
@@ -610,7 +619,7 @@
                     isAccount = true;
                 }
             } else {
-                alert('Web3 provider is not enabled');
+                alert('Please connect to your Web3 provider!');
             }
         });
     }
